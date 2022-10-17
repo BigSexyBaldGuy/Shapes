@@ -19,7 +19,7 @@ public class CanvasComponent extends JComponent {
 
     private int                 whatToDraw;
     private RectangularShape    shape;
-    private Shape               shapeObject;
+    private Shape               freeFormShape;
     private JPopupMenu          popupMenu;
     private java.util.ArrayList shapes = new java.util.ArrayList();
 
@@ -27,7 +27,6 @@ public class CanvasComponent extends JComponent {
     {
         Point startingPoint;
         Point endingPoint;
-
 
         // Every time mouse is clicked
         public void mousePressed(MouseEvent event)
@@ -48,17 +47,14 @@ public class CanvasComponent extends JComponent {
 
                 System.out.println("we are at - " + currentPoint);
 
-                if (shape == null) {
+                if (shape == null || freeFormShape == null) {
                     if (whatToDraw == 0) {
                         shape = new Rectangle2D.Double();
-                        shapes.add(shape);
                     } else if (whatToDraw == 1) {
                         shape = new Ellipse2D.Double();
-                        shapes.add(shape);
                     } else if (whatToDraw == 2) {
-                        shapeObject = new Line2D.Double(startingPoint,
+                        freeFormShape = new Line2D.Double(startingPoint,
                                 currentPoint);
-                        shapes.add(shapeObject);
                     }
                 }
 
@@ -67,13 +63,19 @@ public class CanvasComponent extends JComponent {
                             currentPoint);
                 }
 
-
             repaint();
             }
 
         public void mouseReleased(MouseEvent event)
         {
-            shape = null;
+            if (shape != null) {
+                shapes.add(shape);
+                shape = null;
+            }
+            if (freeFormShape != null){
+                shapes.add(freeFormShape);
+                freeFormShape = null;
+            }
         }
 
         public void mouseMoved(MouseEvent event)
@@ -141,11 +143,18 @@ public class CanvasComponent extends JComponent {
 
             graphics2D = (Graphics2D) graphics;
 
-            if (shape != null || shapeObject != null)
+            if (shape != null)
             {
-                for (Object s : shapes) {
-                    graphics2D.draw((Shape) s);
-                }
+               graphics2D.draw(shape);
+            }
+
+            if (freeFormShape != null)
+            {
+                graphics2D.draw(freeFormShape);
+            }
+
+            for (Object s : shapes) {
+                graphics2D.draw((Shape) s);
             }
         }
     }
