@@ -14,6 +14,9 @@ public class mouseDraw
 {
     public static void main(String arg[])
     {
+        // EventQueue.invokeLater post an event (CanvasFrame) at end of
+        // Swings event list so that it is processed after all previous
+        // GUI events are processed.
         EventQueue.invokeLater(() -> {
                 CanvasFrame     frame;
 

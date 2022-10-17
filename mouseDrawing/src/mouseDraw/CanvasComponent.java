@@ -3,6 +3,7 @@ package mouseDraw;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.util.ArrayList;
 import javax.swing.*;
 
 /**
@@ -18,11 +19,15 @@ public class CanvasComponent extends JComponent {
 
     private int                 whatToDraw;
     private RectangularShape    shape;
+    private Shape               shapeObject;
     private JPopupMenu          popupMenu;
+    private java.util.ArrayList shapes = new java.util.ArrayList();
 
     private class mouseHandler extends MouseAdapter
     {
         Point startingPoint;
+        Point endingPoint;
+
 
         // Every time mouse is clicked
         public void mousePressed(MouseEvent event)
@@ -35,31 +40,47 @@ public class CanvasComponent extends JComponent {
                 startingPoint = event.getPoint();
             }
 
-            public void mouseDragged(MouseEvent event)
-            {
+        public void mouseDragged(MouseEvent event)
+        {
                 Point currentPoint;
 
                 currentPoint = event.getPoint();
 
+                System.out.println("we are at - " + currentPoint);
+
                 if (shape == null) {
                     if (whatToDraw == 0) {
                         shape = new Rectangle2D.Double();
+                        shapes.add(shape);
                     } else if (whatToDraw == 1) {
                         shape = new Ellipse2D.Double();
+                        shapes.add(shape);
+                    } else if (whatToDraw == 2) {
+                        shapeObject = new Line2D.Double(startingPoint,
+                                currentPoint);
+                        shapes.add(shapeObject);
                     }
                 }
 
-                shape.setFrameFromCenter(startingPoint,
-                        currentPoint);
+                if (shape != null) {
+                    shape.setFrameFromCenter(startingPoint,
+                            currentPoint);
+                }
 
-                repaint();
+
+            repaint();
             }
 
-            public void mouseReleased(MouseEvent event)
-            {
-                shape = null;
-            }
+        public void mouseReleased(MouseEvent event)
+        {
+            shape = null;
         }
+
+        public void mouseMoved(MouseEvent event)
+        {
+            endingPoint = event.getPoint();
+        }
+    }
 
         public CanvasComponent()
         {
@@ -80,6 +101,11 @@ public class CanvasComponent extends JComponent {
 
             thisButton = new JRadioButtonMenuItem("Ellipse", false);
             thisButton.addActionListener(event -> whatToDraw = 1);
+            buttonGroup.add(thisButton);
+            popupMenu.add(thisButton);
+
+            thisButton = new JRadioButtonMenuItem("Freeform", false);
+            thisButton.addActionListener(event -> whatToDraw = 2);
             buttonGroup.add(thisButton);
             popupMenu.add(thisButton);
 
@@ -115,9 +141,11 @@ public class CanvasComponent extends JComponent {
 
             graphics2D = (Graphics2D) graphics;
 
-            if (shape != null)
+            if (shape != null || shapeObject != null)
             {
-                graphics2D.draw(shape);
+                for (Object s : shapes) {
+                    graphics2D.draw((Shape) s);
+                }
             }
         }
     }
